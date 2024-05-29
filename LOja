@@ -1,0 +1,244 @@
+import time
+
+def valida(cpf):
+    return len(cpf) == 11
+
+class Usuario:
+    def __init__(self, nome, apelido, senha, rg, cpf, telefone):
+        self.nome = nome
+        self.apelido = apelido
+        self.senha = senha
+        self.email = f"{nome}.{apelido}@gmail.com"
+        self.rg = rg
+        self.cpf = cpf
+        self.telefone = telefone
+
+    def alterar_senha(self, nova_senha):
+        self.senha = nova_senha
+        print("Senha alterada com sucesso!")
+
+class Cliente(Usuario):
+    def __init__(self, nome, rg, cpf, telefone, apelido, senha, endereco):
+        super().__init__(nome, apelido, senha, rg, cpf, telefone)
+        self.endereco = endereco
+
+    def alterar_endereco(self, novo_endereco):
+        self.endereco = novo_endereco
+        print("Endereço alterado com sucesso!")
+
+class Funcionario(Usuario):
+    def __init__(self,  nome, apelido, senha, cargo, rg, cpf, telefone):
+        super().__init__(nome, apelido, senha, rg, cpf, telefone)
+        self.cargo = cargo
+
+class Produto:
+    def __init__(self, id_produto, nome, preco, descricao, tipo, marca, categoria):
+        self.id_produto = id_produto
+        self.nome = nome
+        self.preco = preco
+        self.descricao = descricao
+        self.tipo = tipo
+        self.marca = marca
+        self.categoria = categoria
+
+    def exibir_detalhes(self):
+        return f"Produto: {self.nome}, Preço: R${self.preco:.2f}"
+
+class Pedido:
+    def __init__(self):
+        self.produtos = []
+        self.valor_total = 0
+        self.tipo_produto = None
+        self.forma_pagamento = None
+
+    def adicionar_produto(self, produto):
+        self.produtos.append(produto)
+        self.valor_total += produto.preco
+        print(f"Produto {produto.nome} adicionado ao pedido. Valor total: R${self.valor_total:.2f}")
+
+    def selecionar_tipo_produto(self, tipo):
+        self.tipo_produto = tipo
+
+    def selecionar_forma_pagamento(self, forma):
+        self.forma_pagamento = forma
+
+    def realizar_pagamento(self):
+        if self.tipo_produto is None or self.forma_pagamento is None:
+            print("Por favor, selecione o tipo de produto e a forma de pagamento antes de realizar o pagamento.")
+        else:
+            print(f"Realizando pagamento para {self.tipo_produto}...")
+            time.sleep(2)
+            print(f"Pagamento de R${self.valor_total:.2f} realizado com sucesso via {self.forma_pagamento}.")
+
+clientes = []
+funcionarios = []
+produtos = []
+
+def fazer_login():
+    print("Faça login para continuar:")
+    nome_usuario = input("Nome de usuário 'APELIDO INFORMADO NO CADASTRO': ")
+    senha = input("Senha: ")
+    for usuario in clientes + funcionarios:
+        if usuario.apelido == nome_usuario and usuario.senha == senha:
+            print(f"Bem-vindo, {usuario.nome}!")
+            return usuario
+    print("Usuário ou senha inválidas. Por favor, tente novamente.")
+    return None
+
+def menu_principal():
+  
+    print('Seja bem-vindo\n')
+    print("0. Fazer login")
+    print("1. Cadastrar Funcionário\n")
+    print("2. Cadastrar Cliente")
+    print("3. Cadastrar Produto\n")
+    print("9. Sair")
+    return input("Escolha uma opção: ")
+
+def menu_cliente():
+    print("1. Realizar Pedido e Pagamento\n")
+    print("2. Alterar Endereço\n")
+    print("3. Buscar Produto\n")
+    print("9. Sair")
+    return input("Escolha uma opção: ")
+
+def menu_funcionario():
+    print("1. Realizar Entrega\n")
+    print("2. Buscar Cliente\n")
+    print("3. Buscar Funcionário\n")
+    print("4. Buscar Produto\n")
+    print("9. Sair")
+    return input("Escolha uma opção: ")
+
+if __name__ == '__main__':
+    usuario_logado = None
+    pedido_atual = None
+    while True:
+        if usuario_logado is None:
+            opcao = menu_principal()
+            if opcao == '0':
+                usuario_logado = fazer_login()
+
+            elif opcao == '1':
+                nome = input('Digite nome do funcionário:')
+                apelido = input('Digite apelido:')
+                cargo = input('Qual cargo do funcionário: ')
+                senha = input('Digite sua senha: ')
+                rg = input('Digite seu RG: ')
+                cpf = input('Digite seu CPF: ')
+                telefone = input('Digite seu telefone: ')
+                if valida(cpf):
+                    func = Funcionario(nome, apelido, senha, cargo, rg, cpf, telefone)
+                    funcionarios.append(func)
+                else:
+                    print('CPF inválido.\n')
+
+            elif opcao == '2':
+                nome = input('Nome do Cliente: ')
+                rg = input('RG do Cliente: ')
+                cpf = input('CPF do Cliente: ')
+                telefone = input('Telefone do cliente: ')
+                apelido = input('Apelido do cliente: ')
+                senha = input('Senha do cliente: ')
+                endereco = input('Endereço do cliente: ')
+
+                if valida(cpf):
+                    cli = Cliente(nome, rg, cpf, telefone, apelido, senha, endereco)
+                    clientes.append(cli)
+                else:
+                    print('CPF inválido.\n')
+
+            elif opcao == '3':
+                id_produto = input('Digite o ID do Produto: ')
+                nome = input('Digite o nome do Produto: \n')
+                preco = float(input('\nDigite o valor do produto: R$ '))
+                descricao = input('Digite a descrição do produto: ')
+                tipo = input('\nDigite o tipo do produto: ')
+                marca = input('Digite a marca do produto: ')
+                categoria = input('Digite a categoria do produto: \n')
+                prod = Produto(id_produto, nome, preco, descricao, tipo, marca, categoria)
+                produtos.append(prod)
+                print("Produto cadastrado com sucesso\n")
+
+            elif opcao == '9':
+                break
+        else:
+            if isinstance(usuario_logado, Cliente):
+                opcao = menu_cliente()
+                if opcao == '1':
+                    if len(produtos) == 0:
+                        print("Nenhum produto cadastrado. Por favor, cadastre um produto antes de realizar um pedido.")
+                    else:
+                        pedido_atual = Pedido()
+                        tipo_produto = input("Qual tipo de produto deseja comprar? ")
+                        pedido_atual.selecionar_tipo_produto(tipo_produto)
+                        print("Produtos disponíveis:")
+                        for produto in produtos:
+                            print(produto.exibir_detalhes())
+                        produto_selecionado = input("Digite o nome do produto que deseja comprar: ")
+                        produto_encontrado = False
+                        for produto in produtos:
+                            if produto.nome == produto_selecionado:
+                                pedido_atual.adicionar_produto(produto)
+                                produto_encontrado = True
+                                break
+                        if not produto_encontrado:
+                            print("Produto não encontrado.")
+                        else:
+                            forma_pagamento = input("Selecione a forma de pagamento (dinheiro/cartao): ")
+                            pedido_atual.selecionar_forma_pagamento(forma_pagamento)
+                            pedido_atual.realizar_pagamento()
+                            pedido_atual = None
+
+                elif opcao == '2':
+                    novo_endereco = input('Digite o novo endereço: ')
+                    usuario_logado.alterar_endereco(novo_endereco)
+
+                elif opcao == '3':
+                    nome = input('Digite o nome do produto que deseja buscar: ')
+                    for produto in produtos:
+                        if produto.nome == nome:
+                            print(f'Produto encontrado: {produto.nome}, {produto.descricao}, R${produto.preco:.2f}\n')
+                            break
+                    else:
+                        print('Produto não encontrado.\n')
+
+                elif opcao == '9':
+                    usuario_logado = None
+
+            elif isinstance(usuario_logado, Funcionario):
+                opcao = menu_funcionario()
+                if opcao == '1':
+                    print("Realizando entrega...")
+                    time.sleep(2)
+                    print("Entrega realizada com sucesso!\n")
+
+                elif opcao == '2':
+                    nome = input('Digite o nome do cliente que deseja buscar: \n')
+                    for cliente in clientes:
+                        if cliente.nome == nome:
+                            print(f'Cliente encontrado: {cliente.nome}, Seu email é: {cliente.email}, Endereço do cliente: {cliente.endereco}\n')
+                            break
+                    else:
+                        print('Cliente não encontrado.')
+
+                elif opcao == '3':
+                    nome = input('Digite o nome do funcionário que deseja buscar: ')
+                    for funcionario in funcionarios:
+                        if funcionario.nome == nome:
+                            print(f'Funcionário encontrado: Nome: {funcionario.nome}, O EMAIL CORRESPONDENTE: {funcionario.email}, Cargo atual: {funcionario.cargo}')
+                            break
+                    else:
+                        print('Funcionário não encontrado.')
+
+                elif opcao == '4':
+                    nome = input('Digite o nome do produto que deseja buscar: ')
+                    for produto in produtos:
+                        if produto.nome == nome:
+                            print(f'Produto encontrado: {produto.nome}, {produto.descricao}, R${produto.preco:.2f}\n')
+                            break
+                    else:
+                        print('Produto não encontrado.\n')
+
+                elif opcao == '9':
+                    usuario_logado = None
